@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SISTEMA CENTRAL - AGENTE BONAITE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #020502;
+            color: #00ff00;
+            font-family: 'Share Tech Mono', 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scanlines and CRT Flicker */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Boot Screen */
+        #boot-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            font-size: 1.2em;
+            line-height: 1.5;
+        }
+
+        /* Main Container */
+        .container {
+            border: 2px solid #00ff00;
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+            background: rgba(0, 20, 0, 0.85);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+            z-index: 1;
+            display: none; /* Hidden until boot finishes */
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 1px dashed #00ff00;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        /* Glitch Effect */
+        .glitch {
+            font-size: 2em;
+            margin: 0;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px #00ff00;
+            position: relative;
+        }
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.8;
+        }
+        .glitch::before {
+            left: 2px; text-shadow: -2px 0 red; clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            left: -2px; text-shadow: -2px 0 blue; clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(10px, 9999px, 80px, 0); }
+            20% { clip: rect(60px, 9999px, 10px, 0); }
+            40% { clip: rect(30px, 9999px, 40px, 0); }
+            60% { clip: rect(80px, 9999px, 20px, 0); }
+            80% { clip: rect(20px, 9999px, 50px, 0); }
+            100% { clip: rect(50px, 9999px, 30px, 0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            20% { clip: rect(10px, 9999px, 50px, 0); }
+            40% { clip: rect(80px, 9999px, 20px, 0); }
+            60% { clip: rect(20px, 9999px, 80px, 0); }
+            80% { clip: rect(50px, 9999px, 30px, 0); }
+            100% { clip: rect(30px, 9999px, 60px, 0); }
+        }
+
+        .header p { margin: 5px 0 0 0; color: #88ff88; }
+
+        .stamp {
+            position: absolute;
+            top: 15px; right: 15px;
+            color: #ff0000;
+            border: 3px solid #ff0000;
+            padding: 5px 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            transform: rotate(15deg);
+            opacity: 0.8;
+            letter-spacing: 3px;
+            text-shadow: 0 0 5px #ff0000;
+            z-index: 5;
+        }
+
+        .dossier-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .photo-container {
+            border: 2px solid #00ff00;
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            background-color: #020a02;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0,255,0,0.1);
+        }
+
+        .photo-container img {
+            width: 100%; height: 100%; object-fit: cover;
+            /* display: block; DESCOMENTE ESTA LINHA QUANDO ADICIONAR A FOTO */
+            display: none;
+            filter: grayscale(100%) contrast(120%); /* Filtro para deixar a foto estilo documento antigo */
+            transition: filter 0.5s;
+        }
+        
+        .photo-container:hover img {
+            filter: grayscale(0%) contrast(100%);
+        }
+
+        .photo-placeholder { padding: 20px; color: #00ff00; opacity: 0.5; font-size: 0.9em; }
+        .photo-overlay {
+            position: absolute; bottom: 5px; right: 5px; font-size: 0.7em; color: rgba(0,255,0,0.6);
+        }
+
+        .data-section h2 {
+            font-size: 1.1em;
+            border-bottom: 1px solid #005500;
+            margin-top: 0; padding-bottom: 5px;
+            color: #55ff55; letter-spacing: 1px;
+            background: rgba(0, 50, 0, 0.3);
+            padding-left: 5px;
+        }
+
+        .data-row { margin-bottom: 8px; display: flex; flex-wrap: wrap; }
+        .data-label { width: 160px; font-weight: bold; color: #88ff88; }
+        .data-value { color: #00ff00; font-weight: bold; text-shadow: 0 0 3px #00ff00; }
+
+        /* Dynamic background data stream */
+        .data-stream {
+            position: absolute; right: 10px; bottom: 10px; font-size: 0.7em;
+            color: #004400; text-align: right; pointer-events: none;
+        }
+
+        .action-section {
+            text-align: center; margin-top: 20px; border-top: 1px dashed #00ff00; padding-top: 25px;
+        }
+
+        .btn {
+            background-color: #001100; color: #00ff00;
+            border: 1px solid #00ff00; padding: 15px 30px;
+            font-size: 1.2em; font-family: inherit; cursor: pointer;
+            transition: all 0.3s; text-transform: uppercase; letter-spacing: 2px;
+            position: relative; overflow: hidden;
+        }
+
+        .btn:hover { background-color: #00ff00; color: #000; box-shadow: 0 0 20px #00ff00; }
+
+        #security-layer {
+            display: none; margin-top: 20px; background: #010801;
+            padding: 25px; border: 1px solid #00ff00; box-shadow: inset 0 0 20px rgba(0,255,0,0.1);
+        }
+
+        .password-input {
+            background: #000; border: 1px solid #00ff00; color: #00ff00;
+            padding: 12px; font-family: inherit; font-size: 1.2em;
+            text-align: center; width: 100%; max-width: 250px;
+            margin-bottom: 15px; outline: none; letter-spacing: 3px;
+        }
+        .password-input:focus { box-shadow: 0 0 15px rgba(0, 255, 0, 0.4); }
+
+        .terminal-output {
+            margin-top: 15px; text-align: left; font-size: 0.95em;
+            color: #00cc00; min-height: 80px; line-height: 1.5;
+        }
+
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .glitch { font-size: 1.5em; }
+            .stamp { position: relative; top: 0; right: 0; display: inline-block; margin-bottom: 15px; transform: rotate(0); font-size: 1.2em; }
+            .dossier-grid { grid-template-columns: 1fr; gap: 20px; }
+            .photo-container { height: 300px; max-width: 250px; margin: 0 auto; }
+            .data-label { width: 130px; }
+            .data-stream { display: none; } /* Hide matrix stream on mobile for clarity */
+            .btn { width: 100%; font-size: 1em; padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+
+    <div id="boot-screen">
+        <div id="boot-text"></div>
+        <div><span class="blink">_</span></div>
+    </div>
+
+    <div class="container" id="main-ui">
+        <div class="stamp">ULTRA SECRETO</div>
+        
+        <div class="header">
+            <h1 class="glitch" data-text="AGÊNCIA DE INTELIGÊNCIA">AGÊNCIA DE INTELIGÊNCIA</h1>
+            <p>DIRETÓRIO DE ARQUIVOS CONFIDENCIAIS v4.2</p>
+        </div>
+
+        <div class="dossier-grid">
+            <div class="photo-container">
+                <img src="LINK_DA_FOTO.jpg" alt="Foto do Agente">
+                
+                <div class="photo-placeholder">
+                    [ LINK DE IMAGEM AUSENTE ]<br><br>
+                    RETRATO DO AGENTE
+                </div>
+                <div class="photo-overlay" id="coord-display">LAT: --.---- LON: --.----</div>
+            </div>
+
+            <div class="data-section">
+                <h2>IDENTIFICAÇÃO PRINCIPAL</h2>
+                <div class="data-row"><div class="data-label">NOME:</div><div class="data-value scramble" data-target="LUIS HENRIQUE BONAITE">carregando...</div></div>
+                <div class="data-row"><div class="data-label">SEXO:</div><div class="data-value scramble" data-target="M (RETRATADO: M)">carregando...</div></div>
+                <div class="data-row"><div class="data-label">DATA NASC.:</div><div class="data-value scramble" data-target="1968-06-10 00:00:00">carregando...</div></div>
+                <div class="data-row"><div class="data-label">SIGNO:</div><div class="data-value scramble" data-target="GÊMEOS">carregando...</div></div>
+                <br>
+                <h2>DADOS DE ORIGEM</h2>
+                <div class="data-row"><div class="data-label">NACIONALIDADE:</div><div class="data-value scramble" data-target="BRASIL">carregando...</div></div>
+                <div class="data-row"><div class="data-label">NATURALIDADE:</div><div class="data-value scramble" data-target="S.ANDRE - SP">carregando...</div></div>
+                <br>
+                <h2>BIOMETRIA E CARACTERÍSTICAS</h2>
+                <div class="data-row"><div class="data-label">COR OLHOS:</div><div class="data-value scramble" data-target="CASTANHOS ESCUROS">carregando...</div></div>
+                <div class="data-row"><div class="data-label">COR CABELOS:</div><div class="data-value scramble" data-target="CASTANHOS ESCUROS">carregando...</div></div>
+                <div class="data-row"><div class="data-label">ALTURA (CM):</div><div class="data-value scramble" data-target="193.0">carregando...</div></div>
+                <br>
+                <h2>ÚLTIMA LOCALIZAÇÃO</h2>
+                <div class="data-row"><div class="data-label">LOGRADOURO:</div><div class="data-value scramble" data-target="RUA EDITH CARDOSO, 18">carregando...</div></div>
+                <div class="data-row"><div class="data-label">BAIRRO/CIDADE:</div><div class="data-value scramble" data-target="SACOMA, 355030 - SP">carregando...</div></div>
+                <div class="data-row"><div class="data-label">CEP:</div><div class="data-value scramble" data-target="04249120">carregando...</div></div>
+            </div>
+        </div>
+
+        <div class="action-section">
+            <button class="btn" id="confidential-btn">[ ACESSAR DIRETÓRIO DE VÍDEO ]</button>
+
+            <div id="security-layer">
+                <p style="color:#ff5555; margin-top:0;"><strong>AVISO: TENTATIVAS NÃO AUTORIZADAS RESULTARÃO EM BLOQUEIO DE IP.</strong></p>
+                <p>INSIRA O CÓDIGO DE LIBERAÇÃO (ANO DE NASCIMENTO):</p>
+                <input type="password" id="pass-input" class="password-input" placeholder="****" onkeypress="handleKeyPress(event)" inputmode="numeric" maxlength="4">
+                <br>
+                <button class="btn" style="font-size: 1em; padding: 10px 20px;" onclick="verifyAccess()">EXECUTAR OVERRIDE</button>
+
+                <div id="terminal-output" class="terminal-output">
+                    > AGUARDANDO INPUT DO USUÁRIO... <span class="blink">_</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-stream" id="hex-stream"></div>
+    </div>
+
+    <script>
+        // --- TELA DE BOOT (CARREGAMENTO) ---
+        const bootLines = [
+            "Iniciando protocolo de handshake SECURE-X9...",
+            "Rastreando IP de origem... [192.168.##.##] Oculto",
+            "Bypassing firewall principal... SUCESSO.",
+            "Acessando base de dados da agência...",
+            "Descriptografando dossiê de agente...",
+            "ACESSO CONCEDIDO."
+        ];
+        
+        let bootLineIndex = 0;
+        const bootTextElement = document.getElementById('boot-text');
+
+        function typeBootScreen() {
+            if (bootLineIndex < bootLines.length) {
+                bootTextElement.innerHTML += "> " + bootLines[bootLineIndex] + "<br>";
+                bootLineIndex++;
+                setTimeout(typeBootScreen, Math.random() * 400 + 200); // Velocidade aleatória de digitação
+            } else {
+                setTimeout(() => {
+                    document.getElementById('boot-screen').style.display = 'none';
+                    document.getElementById('main-ui').style.display = 'block';
+                    startDecryption(); // Inicia o efeito dos dados aparecendo
+                    startDynamicEffects(); // Inicia os efeitos de fundo
+                }, 800);
+            }
+        }
+        
+        // Inicia a tela de boot ao carregar a página
+        window.onload = typeBootScreen;
+
+
+        // --- EFEITO DE DESCRIPTOGRAFIA (SCRAMBLE) ---
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
+        
+        function startDecryption() {
+            const elements = document.querySelectorAll('.scramble');
+            
+            elements.forEach(el => {
+                const finalWord = el.getAttribute('data-target');
+                let iterations = 0;
+                
+                const interval = setInterval(() => {
+                    el.innerText = finalWord.split('').map((letter, index) => {
+                        if(index < iterations) return finalWord[index];
+                        return characters[Math.floor(Math.random() * characters.length)];
+                    }).join('');
+                    
+                    if(iterations >= finalWord.length) clearInterval(interval);
+                    iterations += 1/3; // Velocidade do efeito
+                }, 30);
+            });
+        }
+
+        // --- EFEITOS DINÂMICOS (FUNDO E COORDENADAS) ---
+        function startDynamicEffects() {
+            // Gerador de Hexadecimal no canto inferior direito
+            const hexStream = document.getElementById('hex-stream');
+            setInterval(() => {
+                let text = '';
+                for(let i=0; i<5; i++) {
+                    text += "0x" + Math.floor(Math.random()*16777215).toString(16).toUpperCase() + "<br>";
+                }
+                hexStream.innerHTML = text;
+            }, 500);
+
+            // Simulador de coordenadas na foto
+            const coordDisplay = document.getElementById('coord-display');
+            setInterval(() => {
+                const lat = (Math.random() * 90).toFixed(4);
+                const lon = (Math.random() * 180).toFixed(4);
+                coordDisplay.innerText = `LAT: -${lat} LON: -${lon}`;
+            }, 2000);
+        }
+
+        // --- LÓGICA DE SENHA E REDIRECIONAMENTO ---
+        document.getElementById('confidential-btn').addEventListener('click', function() {
+            this.style.display = 'none';
+            document.getElementById('security-layer').style.display = 'block';
+            document.getElementById('pass-input').focus();
+        });
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') verifyAccess();
+        }
+
+        function verifyAccess() {
+            const passInput = document.getElementById('pass-input');
+            const pass = passInput.value;
+            const output = document.getElementById('terminal-output');
+            
+            passInput.disabled = true;
+            output.innerHTML = "> ANALISANDO CREDENCIAIS...<br>";
+            
+            setTimeout(() => {
+                // 2. DEFINA A SENHA AQUI (1968)
+                if(pass === "1968") {
+                    output.innerHTML += "> <span style='color: #00ff00;'>IDENTIDADE CONFIRMADA. BEM-VINDO, AGENTE.</span><br>";
+                    output.innerHTML += "> PREPARANDO FEED DE VÍDEO SEGURO...<br>";
+                    
+                    let progress = 0;
+                    const progressInterval = setInterval(() => {
+                        progress += 20;
+                        output.innerHTML += `> CARREGANDO PACOTES... [${'#'.repeat(progress/10)}${'.'.repeat(10 - progress/10)}] ${progress}%<br>`;
+                        if(progress >= 100) {
+                            clearInterval(progressInterval);
+                            output.innerHTML += "> <span class='blink' style='color: white; background: green; padding: 2px;'>UPLOAD COMPLETO. REDIRECIONANDO.</span>";
+                            
+                            setTimeout(() => {
+                                // 3. COLOQUE O LINK DO VÍDEO AQUI
+                                window.location.href = "https://www.youtube.com/watch?v=SEU_VIDEO_AQUI";
+                            }, 1500);
+                        }
+                    }, 400);
+                    
+                } else {
+                    document.body.style.backgroundColor = "#220000"; // Tela pisca vermelho
+                    setTimeout(() => document.body.style.backgroundColor = "#020502", 200);
+
+                    output.innerHTML += "> <span style='color: #ff0000; font-weight:bold;'>ERRO FATAL: SENHA INCORRETA.</span><br>";
+                    output.innerHTML += "> REGISTRANDO ENDEREÇO MAC...<br>> AGUARDANDO NOVA TENTATIVA... <span class='blink'>_</span>";
+                    passInput.disabled = false;
+                    passInput.value = '';
+                    passInput.focus();
+                }
+            }, 1200);
+        }
+    </script>
+</body>
+</html>
