@@ -111,18 +111,21 @@
         .header p { margin: 5px 0 0 0; color: #88ff88; }
 
         .stamp {
-            position: absolute;
-            top: 15px; right: 15px;
-            color: #ff0000;
-            border: 3px solid #ff0000;
-            padding: 5px 10px;
-            font-size: 1.5em;
-            font-weight: bold;
-            transform: rotate(15deg);
-            opacity: 0.8;
-            letter-spacing: 3px;
-            text-shadow: 0 0 5px #ff0000;
-            z-index: 5;
+                position: absolute;
+                bottom: 20px; 
+                right: 15px; /* Ajustado para não colar muito na borda */
+                color: #ff0000;
+                border: 3px solid #ff0000; /* Borda levemente mais fina para mobile */
+                padding: 5px 10px;
+                font-size: 1.1em; /* Fonte reduzida para caber na tela */
+                font-weight: bold;
+                transform: rotate(-10deg); 
+                opacity: 0.8;
+                letter-spacing: 2px; /* Espaçamento reduzido */
+                text-shadow: 0 0 5px #ff0000;
+                box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+                z-index: 5; 
+                white-space: nowrap; /* ESSA LINHA IMPEDE QUE O TEXTO QUEBRE OU ESTIQUE */
         }
 
         .dossier-grid {
