@@ -111,21 +111,18 @@
         .header p { margin: 5px 0 0 0; color: #88ff88; }
 
         .stamp {
-                position: absolute;
-                bottom: 20px; 
-                right: 15px; /* Ajustado para não colar muito na borda */
-                color: #ff0000;
-                border: 3px solid #ff0000; /* Borda levemente mais fina para mobile */
-                padding: 5px 10px;
-                font-size: 1.1em; /* Fonte reduzida para caber na tela */
-                font-weight: bold;
-                transform: rotate(-10deg); 
-                opacity: 0.8;
-                letter-spacing: 2px; /* Espaçamento reduzido */
-                text-shadow: 0 0 5px #ff0000;
-                box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
-                z-index: 5; 
-                white-space: nowrap; /* ESSA LINHA IMPEDE QUE O TEXTO QUEBRE OU ESTIQUE */
+            position: absolute;
+            top: 15px; right: 15px;
+            color: #ff0000;
+            border: 3px solid #ff0000;
+            padding: 5px 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            transform: rotate(15deg);
+            opacity: 0.8;
+            letter-spacing: 3px;
+            text-shadow: 0 0 5px #ff0000;
+            z-index: 5;
         }
 
         .dossier-grid {
@@ -230,19 +227,21 @@
             .glitch { font-size: 1.5em; }
             .stamp {
                 position: absolute;
-                bottom: 20px; /* Altere de 'top' para 'bottom' */
-                right: 20px; /* Ajuste o valor */
+                top: auto; /* ESSA É A CHAVE! Remove a âncora do topo */
+                bottom: 20px; 
+                right: 15px; 
                 color: #ff0000;
-                border: 4px solid #ff0000;
-                padding: 5px 15px;
-                font-size: 1.5em; /* Diminua um pouco o tamanho se quiser */
+                border: 3px solid #ff0000; 
+                padding: 5px 10px;
+                font-size: 1.1em; 
                 font-weight: bold;
-                transform: rotate(-10deg); /* Uma inclinação mais sutil, e para o outro lado */
+                transform: rotate(-10deg); 
                 opacity: 0.8;
-                letter-spacing: 5px;
+                letter-spacing: 2px; 
                 text-shadow: 0 0 5px #ff0000;
                 box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
-                z-index: 5; /* Garanta que está por cima */
+                z-index: 5; 
+                white-space: nowrap; /* Garante que o texto fique em uma linha */
             }
             .dossier-grid { grid-template-columns: 1fr; gap: 20px; }
             .photo-container { height: 300px; max-width: 250px; margin: 0 auto; }
