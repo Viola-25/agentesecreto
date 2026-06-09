@@ -156,7 +156,13 @@
             filter: grayscale(0%) contrast(100%);
         }
 
-        .photo-placeholder { padding: 20px; color: #00ff00; opacity: 0.5; font-size: 0.9em; }
+        .photo-placeholder {
+            padding: 20px;
+            color: #00ff00;
+            opacity: 0.5;
+            font-size: 0.9em;
+            display: none; /* Adicione esta linha */
+        }
         .photo-overlay {
             position: absolute; bottom: 5px; right: 5px; font-size: 0.7em; color: rgba(0,255,0,0.6);
         }
@@ -219,7 +225,22 @@
         @media (max-width: 768px) {
             .container { padding: 15px; }
             .glitch { font-size: 1.5em; }
-            .stamp { position: relative; top: 0; right: 0; display: inline-block; margin-bottom: 15px; transform: rotate(0); font-size: 1.2em; }
+            .stamp {
+                position: absolute;
+                bottom: 20px; /* Altere de 'top' para 'bottom' */
+                right: 20px; /* Ajuste o valor */
+                color: #ff0000;
+                border: 4px solid #ff0000;
+                padding: 5px 15px;
+                font-size: 1.5em; /* Diminua um pouco o tamanho se quiser */
+                font-weight: bold;
+                transform: rotate(-10deg); /* Uma inclinação mais sutil, e para o outro lado */
+                opacity: 0.8;
+                letter-spacing: 5px;
+                text-shadow: 0 0 5px #ff0000;
+                box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+                z-index: 5; /* Garanta que está por cima */
+            }
             .dossier-grid { grid-template-columns: 1fr; gap: 20px; }
             .photo-container { height: 300px; max-width: 250px; margin: 0 auto; }
             .data-label { width: 130px; }
