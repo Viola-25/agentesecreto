@@ -252,23 +252,23 @@
         @media (max-width: 768px) {
             .container { padding: 15px; }
             .glitch { font-size: 1.5em; }
+            .header { padding-right: 130px; }
             .stamp {
                 position: absolute;
-                top: auto; /* ESSA É A CHAVE! Remove a âncora do topo */
-                bottom: 20px; 
+                top: 15px; 
                 right: 15px; 
                 color: #ff0000;
                 border: 3px solid #ff0000; 
-                padding: 5px 10px;
-                font-size: 1.1em; 
+                padding: 4px 8px;
+                font-size: 1em; 
                 font-weight: bold;
-                transform: rotate(-10deg); 
+                transform: rotate(10deg); 
                 opacity: 0.8;
                 letter-spacing: 2px; 
                 text-shadow: 0 0 5px #ff0000;
                 box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
                 z-index: 5; 
-                white-space: nowrap; /* Garante que o texto fique em uma linha */
+                white-space: nowrap;
             }
             .dossier-grid { grid-template-columns: 1fr; gap: 20px; }
             .photo-container { height: 300px; max-width: 250px; margin: 0 auto; }
@@ -288,9 +288,8 @@
     </div>
 
     <div class="container" id="main-ui">
-        <div class="stamp">ULTRA SECRETO</div>
-        
         <div class="header">
+            <div class="stamp">ULTRA SECRETO</div>
             <h1 class="glitch" data-text="AGÊNCIA DE INTELIGÊNCIA">AGÊNCIA DE INTELIGÊNCIA</h1>
             <p>DIRETÓRIO DE ARQUIVOS CONFIDENCIAIS v4.2</p>
         </div>
